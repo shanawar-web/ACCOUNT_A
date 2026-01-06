@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #3b82f6;
+  --color-brand-secondary: #6366f1;
+  --color-glass-white: rgba(255, 255, 255, 0.8);
+  --color-glass-border: rgba(255, 255, 255, 0.4);
+
+  --shadow-premium: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-premium-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+/* Animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+.shimmer-active {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/50 shadow-glass rounded-2xl;
+  }
+
+  .premium-sidebar-item {
+    @apply flex items-center px-4 py-3 rounded-xl transition-all duration-300 ease-out;
+  }
+
+  .sidebar-active {
+    @apply bg-blue-50/80 text-blue-600 font-semibold;
+  }
+
+  .sidebar-inactive {
+    @apply text-slate-500 hover:bg-slate-50 hover:text-slate-800;
+  }
+
+  .status-badge {
+    @apply px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider shadow-sm;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600;
+  }
+
+  .bg-mesh-white {
+    background-color: #ffffff;
+    background-image:
+      radial-gradient(at 0% 0%, hsla(210, 100%, 98%, 1) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(220, 100%, 97%, 1) 0, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(230, 100%, 96%, 1) 0, transparent 50%);
+  }
+}
