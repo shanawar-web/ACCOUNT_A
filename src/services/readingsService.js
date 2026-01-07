@@ -59,4 +59,49 @@ export const ReadingsService = {
         }
         return response.json();
     },
+
+    createAlert: async (alertData) => {
+        const response = await fetch(`${API_URL}/alerts/create`, {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(alertData),
+        });
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || "Failed to create alert");
+        }
+        return response.json();
+    },
+
+
+    getAlertsDetails: async () => {
+        const response = await fetch(`${API_URL}/alerts/viewalertdetails`, {
+            method: "GET",
+            headers: getAuthHeaders(),
+        });
+        if (!response.ok) throw new Error("Failed to fetch alerts details");
+        return response.json();
+    },
+
+    getAlertDetail: async (alertId) => {
+        const response = await fetch(`${API_URL}/alerts/viewalertdetails/${alertId}`, {
+            method: "GET",
+            headers: getAuthHeaders(),
+        });
+        if (!response.ok) throw new Error("Failed to fetch alert detail");
+        return response.json();
+    },
+
+    updateAlert: async (alertId, message) => {
+        const response = await fetch(`${API_URL}/alerts/update-alert`, {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ alert_id: alertId, message }),
+        });
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || "Failed to update alert");
+        }
+        return response.json();
+    },
 };

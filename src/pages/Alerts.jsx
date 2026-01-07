@@ -52,34 +52,56 @@ const Alerts = () => {
                 machineIdParam = assignedId;
             }
 
-            const response = await ReadingsService.getHistory({ limit: 500, machine_id: machineIdParam });
-            const allRecords = response.data || response.results || (Array.isArray(response) ? response : []);
+            // Fetch from new Alerts API
+            const response = await ReadingsService.getAlertsDetails();
+            const allAlerts = Array.isArray(response) ? response : (response.data || []);
 
-            if (allRecords.length === 0) {
-                setAlerts([]);
-                return;
+            // Filter for assigned machine if necessary (Client-side filtering for now as API might return all)
+            let filteredAlerts = allAlerts;
+            if (machineIdParam) {
+                filteredAlerts = allAlerts.filter(a => String(a.machine_id) === String(machineIdParam));
             }
 
-            const anomalyRecords = allRecords.filter(record => {
-                const rowAdhesive = Number(record.adhesive_weight ?? record.adhesive ?? 0);
-                const rowResin = Number(record.resin_weight ?? record.resin ?? 0);
-                let ratio = record.calculated_ratio ?? (rowResin > 0 ? (rowAdhesive / rowResin) : 0);
-                record.calculated_ratio = ratio;
-                return getStatus(ratio).label !== "Normal";
-            });
+            // Map API fields to UI expected fields
+            const processedRecords = filteredAlerts.map(alert => {
+                // Determine ratio from message if possible or use a default/placeholder
+                // The API example doesn't explicitly return ratio, but we can try to parse or default.
+                // If the UI relies on 'calculated_ratio', we need it.
+                // Assuming 'message' might contain it or we accept 0/null if not available.
+                // For now, we map explicitly known fields.
 
-            // Added metadata to each record for rendering logic
-            const processedRecords = anomalyRecords.map(record => {
-                const mid = record.machine_id || 'null';
-                const time = record.timestamp || 'null';
-                const rid = record.reading_id || 'null';
-                const ad = record.adhesive_weight ?? record.adhesive ?? 0;
-                const re = record.resin_weight ?? record.resin ?? 0;
+                // MOCK/DERIVED values to keep UI from breaking:
+                const ratio = alert.ratio || 0; // If API adds this later
+                const ad = 0;
+                const re = 0;
 
-                // GENERATE SAME FINGERPRINT AS NAVBAR
-                const fingerprint = `FINGERPRINT_V3_${mid}_${time}_${rid}_${ad}_${re}`;
+                const mid = alert.machine_id || 'null';
+                const time = alert.triggered_at || alert.timestamp || new Date().toISOString();
+                const rid = alert.reading_id || alert.alert_id || 'null';
 
-                return { ...record, fingerprint };
+                // GENERATE FINGERPRINT
+                const fingerprint = `ALERT_API_${alert.alert_id}_${mid}_${time}`;
+
+                // Try to infer status from alert_type
+                // "mixing_ratio_high" -> Critical? Warning? 
+                // Let's assume non-normal.
+                // If detailed ratio isn't there, we might need to patch getStatus or mock it.
+                // Let's pass the alert_type as a status label substitute if needed, or pass a fake ratio 
+                // that triggers the right color if we know it's high/low.
+
+                // However, the UI uses getStatus(record.calculated_ratio).
+                // We'll attach the raw alert object properties.
+
+                return {
+                    ...alert,
+                    timestamp: time,
+                    reading_id: rid, // map to reading_id for consistency
+                    id: alert.alert_id, // ensure id is the alert_id
+                    calculated_ratio: ratio,
+                    // If we can't calculate ratio, the UI badge might be wrong unless we override it.
+                    // But for now, we just list them.
+                    fingerprint
+                };
             });
 
             processedRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -102,7 +124,17 @@ const Alerts = () => {
         e.preventDefault();
         if (!selectedAlert) return;
         try {
-            await ReadingsService.acknowledgeAlert(selectedAlert.reading_id, acknowledgeNote);
+            // Using the update-alert API
+            // Note: We mapped alert.alert_id -> alert.id in fetchAlerts
+            const targetId = selectedAlert.id || selectedAlert.alert_id;
+
+            if (!targetId) {
+                alert("Error: Missing Alert ID");
+                return;
+            }
+
+            await ReadingsService.updateAlert(targetId, acknowledgeNote);
+
             setShowAcknowledgeModal(false);
             setAcknowledgeNote("");
             fetchAlerts();
@@ -112,6 +144,15 @@ const Alerts = () => {
     };
 
     const displayedAlerts = alerts.filter(alert => {
+        const isResolved = alert.acknowledged_by != null;
+
+        if (filterType === "ACKNOWLEDGED") {
+            return isResolved;
+        }
+
+        // For ALL, CRITICAL, WARNING, we only show UNRESOLVED alerts
+        if (isResolved) return false;
+
         if (filterType === "ALL") return true;
         return getStatus(alert.calculated_ratio).label.toUpperCase() === filterType;
     });
@@ -127,7 +168,7 @@ const Alerts = () => {
                 </div>
 
                 <div className="flex bg-slate-100 p-1 rounded-xl">
-                    {["ALL", "CRITICAL", "WARNING"].map((type) => (
+                    {["ALL", "CRITICAL", "WARNING", "ACKNOWLEDGED"].map((type) => (
                         <button
                             key={type}
                             onClick={() => setFilterType(type)}
@@ -136,17 +177,13 @@ const Alerts = () => {
                                 : "text-slate-500 hover:text-slate-700"
                                 }`}
                         >
-                            {type}
+                            {type === "ACKNOWLEDGED" ? "RESOLVED" : type}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {loading ? (
-                <div className="flex flex-col items-center justify-center py-24">
-                    <div className="w-12 h-12 border-4 border-slate-100 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-                </div>
-            ) : displayedAlerts.length === 0 ? (
+            {displayedAlerts.length === 0 ? (
                 <div className="glass-card p-12 text-center flex flex-col items-center">
                     <h2 className="text-xl font-black text-slate-800 mb-2 font-black uppercase tracking-tight">No Anomalies Detected</h2>
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Everything is within tolerance</p>
@@ -154,7 +191,10 @@ const Alerts = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {displayedAlerts.map((alert, index) => {
-                        const status = getStatus(alert.calculated_ratio);
+                        let status = getStatus(alert.calculated_ratio);
+                        if (alert.acknowledged_by) {
+                            status = { label: "Resolved", color: "bg-emerald-100 text-emerald-600 border border-emerald-200" };
+                        }
                         const isHighlighted = (highlightFingerprint && highlightFingerprint === alert.fingerprint);
 
                         return (

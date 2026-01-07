@@ -117,6 +117,18 @@ const Navbar = () => {
                             if (toastsAdded < 10) {
                                 addToast(`ALERT: ${alert.Machine?.name || alert.machine_name || 'Machine'} ratio ${alert.status.label}`, alert.status.label === "Critical" ? "critical" : "warning");
                                 toastsAdded++;
+
+                                // Trigger API to save alert in DB
+                                if (alert.reading_id) {
+                                    const alertType = Number(alert.ratioVal) > 1.0 ? "mixing_ratio_high" : "mixing_ratio_low";
+                                    ReadingsService.createAlert({
+                                        machine_id: alert.machine_id,
+                                        reading_id: alert.reading_id,
+                                        alert_type: alertType,
+                                        message: `Mixing ratio ${alert.status.label}: ${alert.ratioVal}`,
+                                        triggered_at: new Date().toISOString()
+                                    }).catch(err => console.error("Failed to save auto-alert:", err));
+                                }
                             }
                         }
                     }
