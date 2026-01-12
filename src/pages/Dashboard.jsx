@@ -115,15 +115,16 @@ const Dashboard = () => {
 
     return (
         <Layout>
-            <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Machine Overview</h1>
-                    <p className="text-xs font-semibold text-slate-400 mt-1 uppercase tracking-widest">Real-time status of all nodes</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Machine Overview</h1>
+                    <p className="text-[10px] md:text-xs font-semibold text-slate-400 mt-0.5 md:mt-1 uppercase tracking-widest">Real-time status of all nodes</p>
                 </div>
-                {error && <span className="text-red-500 text-sm font-bold bg-red-50 px-4 py-2 rounded-xl border border-red-100">{error}</span>}
+                {error && <span className="text-red-500 text-xs md:text-sm font-bold bg-red-50 px-3 md:px-4 py-1.5 md:py-2 rounded-xl border border-red-100 w-fit">{error}</span>}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+
                 {machineData.map((machine) => {
                     // 1. Robust weight detection
                     const adhesive = Number(machine.adhesive_weight ?? machine.adhesive ?? machine.last_adhesive ?? machine.latest_adhesive ?? machine.total_adhesive ?? 0);

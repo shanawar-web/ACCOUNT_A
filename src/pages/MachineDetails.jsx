@@ -144,32 +144,33 @@ const MachineDetails = () => {
 
     return (
         <Layout>
-            <div className="mb-8 flex justify-between items-start">
-                <div>
-                    <div className="flex items-center gap-3 mb-2">
+            <div className="mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => navigate("/dashboard")}
-                            className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 hover:text-slate-800 hover:border-slate-300 transition-all shadow-sm"
+                            className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 hover:text-slate-800 hover:border-slate-300 transition-all shadow-sm shrink-0"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                         </button>
-                        <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{machineName}</h2>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight truncate">{machineName}</h2>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Machine ID: {id}</span>
+                    <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+                        <span className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Machine ID: {id}</span>
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                        <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest">Live Updates Active</span>
+                        <span className="text-[10px] md:text-[11px] font-bold text-emerald-600 uppercase tracking-widest">Live Updates Active</span>
                     </div>
                 </div>
 
-                <div className={`status-badge !text-sm !px-6 !py-2 ${status.color} shadow-sm border border-slate-100/50`}>
+                <div className={`status-badge !text-xs md:!text-sm !px-4 md:!px-6 !py-1.5 md:!py-2 ${status.color} shadow-sm border border-slate-100/50 w-fit`}>
                     Status: {status.label}
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
+
                 {/* Performance Meter */}
                 <div className="lg:col-span-2 glass-card p-0 overflow-hidden flex flex-col">
                     <div className="p-6 border-b border-slate-100/50 bg-slate-50/30 flex justify-between items-center">
@@ -243,24 +244,25 @@ const MachineDetails = () => {
 
             {/* History Table */}
             <div className="glass-card overflow-hidden">
-                <div className="p-6 border-b border-slate-100/50 bg-slate-50/30 flex justify-between items-center">
-                    <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest">Cycle Record Stream</h3>
-                    <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                        <span className="w-2 h-2 rounded-full bg-slate-200 animate-pulse"></span>
+                <div className="p-4 md:p-6 border-b border-slate-100/50 bg-slate-50/30 flex justify-between items-center">
+                    <h3 className="text-[10px] md:text-xs font-bold text-slate-800 uppercase tracking-widest">Cycle Record Stream</h3>
+                    <div className="flex items-center gap-2 text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-slate-200 animate-pulse"></span>
                         Last 20 Samples
                     </div>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto custom-scrollbar">
                     <table className="w-full text-left">
                         <thead className="bg-slate-50/50">
                             <tr>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Date & Time</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Operator</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Payload Profile (kg)</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Stability Ratio</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">Cycle Health</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Date & Time</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Operator</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Payload (kg)</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center hide-on-mobile">Ratio</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">Cycle Health</th>
                             </tr>
                         </thead>
+
                         <tbody className="divide-y divide-slate-50">
                             {records.map((record, index) => {
                                 const rowAdhesive = Number(record.adhesive_weight ?? record.adhesive ?? record.last_adhesive ?? 0);
@@ -272,53 +274,54 @@ const MachineDetails = () => {
 
                                 return (
                                     <tr key={index} className="hover:bg-blue-50/30 transition-colors group">
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 md:px-6 py-3 md:py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-slate-700">{new Date(record.timestamp).toLocaleDateString()}</span>
-                                                <span className="text-[11px] font-medium text-slate-400 italic uppercase">{new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                <span className="text-xs md:text-sm font-bold text-slate-700">{new Date(record.timestamp).toLocaleDateString()}</span>
+                                                <span className="text-[10px] md:text-[11px] font-medium text-slate-400 italic uppercase">{new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
+                                        <td className="px-4 md:px-6 py-3 md:py-4">
+                                            <div className="flex items-center gap-2 md:gap-3">
                                                 {/* Robust operator identity detection */}
                                                 {(() => {
                                                     const opName = record.User?.name || record.Operator?.name || record.operator?.name || record.operator_name || "System Agent";
                                                     const opInitial = opName[0] || 'S';
                                                     return (
                                                         <>
-                                                            <div className="w-7 h-7 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-[11px] font-bold text-slate-400 shadow-sm group-hover:border-blue-200 group-hover:text-blue-500 transition-all">
+                                                            <div className="w-6 h-6 md:w-7 md:h-7 bg-white border border-slate-100 rounded-lg flex items-center justify-center text-[9px] md:text-[11px] font-bold text-slate-400 shadow-sm group-hover:border-blue-200 group-hover:text-blue-500 transition-all">
                                                                 {opInitial}
                                                             </div>
-                                                            <span className="text-xs font-bold text-slate-600">{opName}</span>
+                                                            <span className="text-[10px] md:text-xs font-bold text-slate-600 truncate max-w-[60px] md:max-w-none">{opName}</span>
                                                         </>
                                                     );
                                                 })()}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex justify-center items-center gap-4">
+                                        <td className="px-4 md:px-6 py-3 md:py-4">
+                                            <div className="flex justify-center items-center gap-2 md:gap-4">
                                                 <div className="flex flex-col items-center">
-                                                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Adh</span>
-                                                    <span className="text-sm font-bold text-slate-600">{rowAdhesive}</span>
+                                                    <span className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Adh</span>
+                                                    <span className="text-xs md:text-sm font-bold text-slate-600">{rowAdhesive}</span>
                                                 </div>
                                                 <div className="w-px h-6 bg-slate-100"></div>
                                                 <div className="flex flex-col items-center">
-                                                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Res</span>
-                                                    <span className="text-sm font-bold text-slate-600">{rowResin}</span>
+                                                    <span className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-tighter">Res</span>
+                                                    <span className="text-xs md:text-sm font-bold text-slate-600">{rowResin}</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className="text-sm font-bold text-slate-800 bg-slate-50 border border-slate-100 px-4 py-1.5 rounded-full">
+                                        <td className="px-4 md:px-6 py-3 md:py-4 text-center hide-on-mobile">
+                                            <span className="text-xs md:text-sm font-bold text-slate-800 bg-slate-50 border border-slate-100 px-3 md:px-4 py-1 md:py-1.5 rounded-full">
                                                 {Number(rowRatio).toFixed(3)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <span className={`status-badge ${rowStatus.color}`}>
+                                        <td className="px-4 md:px-6 py-3 md:py-4 text-right">
+                                            <span className={`status-badge !text-[10px] md:!text-xs ${rowStatus.color}`}>
                                                 {rowStatus.label}
                                             </span>
                                         </td>
                                     </tr>
+
                                 );
                             })}
                         </tbody>

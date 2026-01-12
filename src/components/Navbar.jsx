@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ReadingsService } from "../services/readingsService";
 import { UserService } from "../services/userService";
+import { MachineService } from "../services/machineService";
 import { getStatus } from "../services/mockData";
 import Toast from "./Toast";
 
-const Navbar = () => {
+const Navbar = ({ toggleSidebar }) => {
     const { user, logout } = useContext(AuthContext);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [activeAlerts, setActiveAlerts] = useState([]);
@@ -75,9 +76,14 @@ const Navbar = () => {
             };
             const assignedId = getAssignedId(currentUser);
 
-            // Fetch from Alerts DB
-            const response = await ReadingsService.getAlertsDetails();
+            // Fetch alerts and machines concurrently
+            const [response, machinesData] = await Promise.all([
+                ReadingsService.getAlertsDetails(),
+                MachineService.getMachines().catch(() => [])
+            ]);
+
             const allAlerts = Array.isArray(response) ? response : (response.data || []);
+            const machinesArray = Array.isArray(machinesData) ? machinesData : [];
 
             const seenIdsInStorage = getSeenIdsFromStorage();
 
@@ -90,9 +96,8 @@ const Navbar = () => {
                 // Only show unresolved alerts in navbar
                 return !alert.acknowledged_by;
             }).map(alert => {
-                // Determine status/color from alert data
-                // API might return 'alert_type' like 'mixing_ratio_high'
-                // We need to map this to "Critical" or "Warning" or use getStatus if we have ratio
+                const machine = machinesArray.find(m => String(m.id) === String(alert.machine_id));
+                const machineName = machine?.name || alert.Machine?.name || alert.machine_name || `Node ${alert.machine_id}`;
 
                 let ratio = alert.ratio || alert.calculated_ratio || 0;
                 if (!ratio && alert.message) {
@@ -114,6 +119,7 @@ const Navbar = () => {
 
                 return {
                     ...alert,
+                    machine_name: machineName,
                     status: status,
                     ratioVal: Number(ratio).toFixed(3),
                     fingerprint: getRecordFingerprint(alert),
@@ -187,7 +193,7 @@ const Navbar = () => {
 
     return (
         <>
-            <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none select-none w-full max-w-sm">
+            <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none select-none w-full max-w-[calc(100vw-2rem)] md:max-w-sm">
                 {toasts.map(t => (
                     <div key={t.id} className="pointer-events-auto">
                         <Toast
@@ -200,26 +206,38 @@ const Navbar = () => {
                 ))}
             </div>
 
-            <div className="bg-white/70 backdrop-blur-md border-b border-slate-200/50 p-4 px-8 flex justify-between items-center sticky top-0 z-40">
-                <div className="flex flex-col">
-                    <h1 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Live Intelligence</h1>
-                    <p className="text-xl font-black text-slate-800 leading-none">Command Center</p>
+            <div className="bg-white/70 backdrop-blur-md border-b border-slate-200/50 p-3 md:p-4 md:px-8 flex justify-between items-center sticky top-0 z-40">
+                <div className="flex items-center gap-3">
+                    {/* Mobile Menu Toggle */}
+                    <button
+                        onClick={toggleSidebar}
+                        className="p-2 md:hidden text-slate-500 hover:bg-slate-50 rounded-lg transition-colors"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+
+                    <div className="flex flex-col">
+                        <h1 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Live Intelligence</h1>
+                        <p className="text-lg md:text-xl font-black text-slate-800 leading-none">Command Center</p>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 md:gap-6">
                     <div className="relative">
                         <button
                             onClick={handleBellClick}
-                            className={`p-2.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
+                            className={`p-2 md:p-2.5 rounded-xl transition-all duration-300 ${isDropdownOpen ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                             {unreadCount > 0 && (
                                 <div className="absolute top-1 right-1">
-                                    <span className="relative flex h-5 w-5">
+                                    <span className="relative flex h-4 w-4 md:h-5 md:w-5">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-5 w-5 bg-red-600 border-2 border-white flex items-center justify-center text-[10px] font-black text-white leading-none">
+                                        <span className="relative inline-flex rounded-full h-4 w-4 md:h-5 md:w-5 bg-red-600 border-2 border-white flex items-center justify-center text-[8px] md:text-[10px] font-black text-white leading-none">
                                             {unreadCount}
                                         </span>
                                     </span>
@@ -228,7 +246,7 @@ const Navbar = () => {
                         </button>
 
                         {isDropdownOpen && (
-                            <div className="absolute right-0 mt-4 w-80 glass-card p-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 ring-1 ring-slate-200 shadow-premium-xl border border-slate-200/50">
+                            <div className="absolute right-0 mt-4 w-72 md:w-80 glass-card p-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 ring-1 ring-slate-200 shadow-premium-xl border border-slate-200/50">
                                 <div className="px-4 py-3 border-b border-slate-100 flex justify-between items-center">
                                     <span className="text-sm font-black text-slate-800 uppercase tracking-tight">Active Stream</span>
                                     <span className="bg-red-100 text-red-600 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">{activeAlerts.length} Events</span>
@@ -260,12 +278,12 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
-                        <div className="flex flex-col items-end">
+                    <div className="flex items-center gap-2 md:gap-4 pl-2 md:pl-6 border-l border-slate-100">
+                        <div className="hidden md:flex flex-col items-end">
                             <p className="text-sm font-bold text-slate-800 leading-none mb-1">{user?.name}</p>
                             <p className="text-[10px] font-black text-slate-400 tracking-wider uppercase leading-none">{user?.role}</p>
                         </div>
-                        <button onClick={logout} className="p-2.5 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-xl transition-all border border-slate-100">
+                        <button onClick={logout} className="p-2 md:p-2.5 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-xl transition-all border border-slate-100">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>

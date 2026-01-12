@@ -148,30 +148,31 @@ const Records = () => {
     };
 
     return (
+
         <Layout>
-            <div className="mb-8 flex justify-between items-end">
+            <div className="mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Machine Records</h1>
-                    <p className="text-xs font-semibold text-slate-400 mt-1 uppercase tracking-widest">History of all machine readings</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Machine Records</h1>
+                    <p className="text-[10px] md:text-xs font-semibold text-slate-400 mt-0.5 md:mt-1 uppercase tracking-widest">History of all machine readings</p>
                 </div>
                 <button
                     onClick={fetchRecords}
                     disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                    className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-[10px] md:text-xs uppercase tracking-widest shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-50"
                 >
                     {loading ? "Refreshing..." : "Refresh Records"}
                 </button>
             </div>
 
             {/* Filters Section */}
-            <div className="glass-card p-6 mb-8 grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                <div className="md:col-span-2">
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">Select Machine</label>
+            <div className="glass-card p-4 md:p-6 mb-6 md:mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 items-end">
+                <div className="sm:col-span-2">
+                    <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1 md:mb-2 px-1">Select Machine</label>
                     <select
                         name="machine_id"
                         value={filters.machine_id}
                         onChange={handleFilterChange}
-                        className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none"
+                        className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 md:py-3 text-xs md:text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none"
                     >
                         <option value="">All Machines</option>
                         {machines.map(m => (
@@ -181,12 +182,12 @@ const Records = () => {
                 </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">Status</label>
+                    <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1 md:mb-2 px-1">Status</label>
                     <select
                         name="status"
                         value={filters.status}
                         onChange={handleFilterChange}
-                        className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none"
+                        className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-2.5 md:py-3 text-xs md:text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none"
                     >
                         <option value="">All Statuses</option>
                         <option value="Normal">Normal</option>
@@ -196,26 +197,26 @@ const Records = () => {
                 </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">Page</label>
+                    <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1 md:mb-2 px-1">Page</label>
                     <div className="flex gap-2">
                         <button
                             onClick={() => setPage(p => Math.max(1, p - 1))}
                             disabled={page === 1}
-                            className="flex-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 p-3 rounded-xl transition-all"
+                            className="flex-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 p-2.5 md:p-3 rounded-xl transition-all"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
-                        <div className="flex-[2] bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-sm font-bold text-slate-600">
+                        <div className="flex-[2] bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-xs md:text-sm font-bold text-slate-600">
                             Page {page}
                         </div>
                         <button
                             onClick={() => setPage(p => p + 1)}
                             disabled={page >= totalPages}
-                            className="flex-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 p-3 rounded-xl transition-all"
+                            className="flex-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-30 p-2.5 md:p-3 rounded-xl transition-all"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                         </button>
@@ -223,20 +224,22 @@ const Records = () => {
                 </div>
             </div>
 
+
             {/* Records Table */}
             <div className="glass-card overflow-hidden">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto custom-scrollbar">
                     <table className="w-full text-left">
                         <thead className="bg-slate-50/50 border-b border-slate-100">
                             <tr>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Date & Time</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Machine Name</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Operator</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Reading (kg)</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Ratio</th>
-                                <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">Status</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Date & Time</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Machine</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest hide-on-mobile">Operator</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Reading (kg)</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Ratio</th>
+                                <th className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">Status</th>
                             </tr>
                         </thead>
+
                         <tbody className="divide-y divide-slate-50">
                             {records.map((record) => {
                                 // 1. Robust weight and ratio detection
@@ -258,50 +261,51 @@ const Records = () => {
 
                                 return (
                                     <tr key={record.id || Math.random()} className="hover:bg-blue-50/30 transition-colors group">
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 md:px-6 py-3 md:py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-slate-700">{new Date(record.timestamp).toLocaleDateString()}</span>
-                                                <span className="text-[11px] font-medium text-slate-400 italic">{new Date(record.timestamp).toLocaleTimeString()}</span>
+                                                <span className="text-xs md:text-sm font-bold text-slate-700">{new Date(record.timestamp).toLocaleDateString()}</span>
+                                                <span className="text-[10px] md:text-[11px] font-medium text-slate-400 italic">{new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 md:px-6 py-3 md:py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{machineName}</span>
-                                                <span className="text-[11px] font-bold text-slate-300">MAC-{record.machine_id}</span>
+                                                <span className="text-xs md:text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{machineName}</span>
+                                                <span className="text-[10px] md:text-[11px] font-bold text-slate-300 uppercase">ID: {record.machine_id}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center text-[11px] font-bold text-slate-500 border border-white shadow-sm">
+                                        <td className="px-4 md:px-6 py-3 md:py-4 hide-on-mobile">
+                                            <div className="flex items-center gap-2 md:gap-3">
+                                                <div className="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center text-[10px] md:text-[11px] font-bold text-slate-500 border border-white shadow-sm">
                                                     {operatorInitial}
                                                 </div>
-                                                <span className="text-xs font-bold text-slate-600">{operatorName}</span>
+                                                <span className="text-[10px] md:text-xs font-bold text-slate-600 truncate max-w-[80px] md:max-w-none">{operatorName}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex justify-center items-center gap-4">
+                                        <td className="px-4 md:px-6 py-3 md:py-4">
+                                            <div className="flex justify-center items-center gap-2 md:gap-4">
                                                 <div className="flex flex-col items-center">
-                                                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">Adhesive</span>
-                                                    <span className="text-sm font-bold text-slate-600">{rowAdhesive}</span>
+                                                    <span className="text-[8px] md:text-[10px] font-bold text-slate-300 uppercase tracking-tighter">Adh</span>
+                                                    <span className="text-xs md:text-sm font-bold text-slate-600 text-center">{rowAdhesive}</span>
                                                 </div>
                                                 <div className="w-px h-6 bg-slate-100"></div>
                                                 <div className="flex flex-col items-center">
-                                                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">Resin</span>
-                                                    <span className="text-sm font-bold text-slate-600">{rowResin}</span>
+                                                    <span className="text-[8px] md:text-[10px] font-bold text-slate-300 uppercase tracking-tighter">Res</span>
+                                                    <span className="text-xs md:text-sm font-bold text-slate-600 text-center">{rowResin}</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className="text-sm font-bold text-blue-600 bg-blue-50/50 border border-blue-100/50 px-4 py-1.5 rounded-full shadow-sm">
+                                        <td className="px-4 md:px-6 py-3 md:py-4 text-center">
+                                            <span className="text-xs md:text-sm font-bold text-blue-600 bg-blue-50/50 border border-blue-100/50 px-3 md:px-4 py-1 md:py-1.5 rounded-full shadow-sm">
                                                 {Number(rowRatio).toFixed(3)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <span className={`status-badge ${status.color}`}>
+                                        <td className="px-4 md:px-6 py-3 md:py-4 text-right">
+                                            <span className={`status-badge !text-[10px] md:!text-xs ${status.color}`}>
                                                 {status.label}
                                             </span>
                                         </td>
                                     </tr>
+
                                 );
                             })}
                         </tbody>

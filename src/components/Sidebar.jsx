@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ROLES } from "../services/mockData";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, setIsOpen }) => {
     const { user } = useContext(AuthContext);
 
     const navItems = [
@@ -41,13 +41,21 @@ const Sidebar = () => {
     }
 
     return (
-        <div className="w-64 bg-white border-r border-slate-200 flex flex-col h-screen z-30">
+        <div className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 flex flex-col h-screen z-50 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             <div className="p-6">
-                <div className="flex items-center gap-3 mb-10 px-2">
-                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                        <span className="text-xl font-bold italic text-white">A</span>
+                <div className="flex items-center justify-between mb-10 px-2">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                            <span className="text-xl font-bold italic text-white">A</span>
+                        </div>
+                        <span className="text-xl font-bold tracking-tight text-slate-800 uppercase">Adhesive</span>
                     </div>
-                    <span className="text-xl font-bold tracking-tight text-slate-800 uppercase">Adhesive</span>
+                    {/* Close Button Mobile */}
+                    <button onClick={() => setIsOpen(false)} className="md:hidden p-2 text-slate-400 hover:text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
 
                 <nav className="space-y-2">
@@ -55,6 +63,7 @@ const Sidebar = () => {
                         <NavLink
                             key={item.path}
                             to={item.path}
+                            onClick={() => setIsOpen(false)} // Close on navigation in mobile
                             className={({ isActive }) =>
                                 `premium-sidebar-item ${isActive ? 'sidebar-active shadow-sm border-l-4 border-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`
                             }

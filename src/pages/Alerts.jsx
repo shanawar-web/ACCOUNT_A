@@ -4,6 +4,7 @@ import Layout from "../components/Layout";
 import { getStatus } from "../services/mockData";
 import { ReadingsService } from "../services/readingsService";
 import { UserService } from "../services/userService";
+import { MachineService } from "../services/machineService";
 import { AuthContext } from "../context/AuthContext";
 
 const Alerts = () => {
@@ -52,11 +53,18 @@ const Alerts = () => {
                 machineIdParam = assignedId;
             }
 
-            // Fetch from new Alerts API
-            const response = await ReadingsService.getAlertsDetails();
-            const allAlerts = Array.isArray(response) ? response : (response.data || []);
+            // Fetch alerts, machines and users concurrently
+            const [response, machinesData, usersData] = await Promise.all([
+                ReadingsService.getAlertsDetails(),
+                MachineService.getMachines().catch(() => []),
+                UserService.getUsers().catch(() => [])
+            ]);
 
-            // Filter for assigned machine if necessary (Client-side filtering for now as API might return all)
+            const allAlerts = Array.isArray(response) ? response : (response.data || []);
+            const machinesArray = Array.isArray(machinesData) ? machinesData : [];
+            const usersArray = usersData.data || (Array.isArray(usersData) ? usersData : []);
+
+            // Filter for assigned machine if necessary
             let filteredAlerts = allAlerts;
             if (machineIdParam) {
                 filteredAlerts = allAlerts.filter(a => String(a.machine_id) === String(machineIdParam));
@@ -64,6 +72,12 @@ const Alerts = () => {
 
             // Map API fields to UI expected fields
             const processedRecords = filteredAlerts.map(alert => {
+                const machine = machinesArray.find(m => String(m.id) === String(alert.machine_id));
+                const machineName = machine?.name || alert.Machine?.name || alert.machine_name || `Node ${alert.machine_id}`;
+
+                // Map user name for acknowledgment
+                const resolver = usersArray.find(u => String(u.id) === String(alert.acknowledged_by));
+                const resolverName = resolver?.name || alert.AcknowledgedBy?.name || `user:${alert.acknowledged_by}`;
                 // Determine ratio from message if possible or use a default/placeholder
                 // The API example doesn't explicitly return ratio, but we can try to parse or default.
                 // If the UI relies on 'calculated_ratio', we need it.
@@ -94,12 +108,12 @@ const Alerts = () => {
 
                 return {
                     ...alert,
+                    machine_name: machineName,
+                    resolver_name: resolverName,
                     timestamp: time,
-                    reading_id: rid, // map to reading_id for consistency
-                    id: alert.alert_id, // ensure id is the alert_id
+                    reading_id: rid,
+                    id: alert.alert_id,
                     calculated_ratio: ratio,
-                    // If we can't calculate ratio, the UI badge might be wrong unless we override it.
-                    // But for now, we just list them.
                     fingerprint
                 };
             });
@@ -156,29 +170,30 @@ const Alerts = () => {
 
     return (
         <Layout>
-            <div className="flex justify-between items-end mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-6 md:mb-8">
                 <div>
-                    <h1 className="text-2xl font-black text-slate-800 tracking-tight">Active Anomalies</h1>
-                    <p className="text-[11px] font-black text-slate-400 mt-1 uppercase tracking-[0.2em]">
+                    <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Active Anomalies</h1>
+                    <p className="text-[10px] md:text-[11px] font-black text-slate-400 mt-0.5 md:mt-1 uppercase tracking-[0.2em]">
                         Live Detection Log ({alerts.length} Total)
                     </p>
                 </div>
 
-                <div className="flex bg-slate-100 p-1 rounded-xl">
+                <div className="flex w-full md:w-auto bg-slate-100 p-1 rounded-xl">
                     {["ALL", "RESOLVED"].map((type) => (
                         <button
                             key={type}
                             onClick={() => setFilterType(type)}
-                            className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${filterType === type
+                            className={`flex-1 md:flex-none px-3 md:px-4 py-2 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-wider transition-all ${filterType === type
                                 ? "bg-white text-slate-800 shadow-sm"
                                 : "text-slate-500 hover:text-slate-700"
                                 }`}
                         >
-                            {type === "ALL" ? "ACTIVE ALERTS" : "RESOLVED"}
+                            {type === "ALL" ? "ACTIVE" : "RESOLVED"}
                         </button>
                     ))}
                 </div>
             </div>
+
 
             {displayedAlerts.length === 0 ? (
                 <div className="glass-card p-12 text-center flex flex-col items-center">
@@ -238,7 +253,7 @@ const Alerts = () => {
                                             <div className="flex justify-between items-start mb-1">
                                                 <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Protocol Resolution</span>
                                                 <span className="text-[9px] font-bold text-emerald-400">
-                                                    {alert.AcknowledgedBy?.name || `user:${alert.acknowledged_by}`}
+                                                    {alert.resolver_name}
                                                 </span>
                                             </div>
                                             <p className="text-xs font-medium text-emerald-800 leading-snug">
